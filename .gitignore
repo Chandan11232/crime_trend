@@ -1,0 +1,7 @@
+*.csv
+myproject-env/
+__pycache__/
+.DS_Store
+*.csv
+myproject-env/
+__pycache__/
