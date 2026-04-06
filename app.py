@@ -15,12 +15,13 @@ Project layout:
     └── README.md           ← setup & usage guide
 """
 
-import streamlit as st
-import pandas as pd
 import os
 
-from data_loader import load_and_clean, get_summary_stats
+import pandas as pd
+import streamlit as st
+
 import charts as ch
+from data_loader import get_summary_stats, load_and_clean
 
 # ── Page config ───────────────────────────────────────────────────────────────
 
@@ -33,7 +34,8 @@ st.set_page_config(
 
 # ── Custom CSS ─────────────────────────────────────────────────────────────────
 
-st.markdown("""
+st.markdown(
+    """
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
@@ -145,7 +147,9 @@ st.markdown("""
     margin-bottom: 8px;
   }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
@@ -155,13 +159,14 @@ with st.sidebar:
     st.title("🚨 LA Crime\nDashboard")
     st.markdown("---")
 
-    # File path input
-    default_path = os.path.join(os.path.dirname(__file__), "Crime_Data_from_2020_to_Present.csv")
+    default_path = "https://drive.google.com/uc?export=download&id=1Exky_OVFKVTg2n3ENWED8_hcPuXJLYgx"
+
     csv_path = st.text_input(
-        "📂 CSV File Path",
+        "📂 Data Source (URL or Local Path)",
         value=default_path,
-        help="Absolute or relative path to the LAPD crime CSV file.",
+        help="Using Google Drive link for 238MB dataset to stay within GitHub limits.",
     )
+    # File path input
 
     st.markdown("---")
     st.markdown("### 🔍 Filters")
@@ -175,9 +180,7 @@ with st.sidebar:
         df_raw = load_and_clean(csv_path)
 
     # Year filter
-    available_years = sorted(
-        df_raw["year"].dropna().astype(int).unique().tolist()
-    )
+    available_years = sorted(df_raw["year"].dropna().astype(int).unique().tolist())
     # Exclude partial years at the end
     full_years = [y for y in available_years if y <= 2024]
 
@@ -238,8 +241,10 @@ if len(df) == 0:
 # ── Header ────────────────────────────────────────────────────────────────────
 
 st.markdown('<div class="badge">● LAPD · 2020 – 2025</div>', unsafe_allow_html=True)
-st.markdown("## LA CRIME RATE  <span style='color:#ff4c4c'>TREND ANALYSIS</span>",
-            unsafe_allow_html=True)
+st.markdown(
+    "## LA CRIME RATE  <span style='color:#ff4c4c'>TREND ANALYSIS</span>",
+    unsafe_allow_html=True,
+)
 st.markdown(
     f"<p style='color:#6b7280; font-size:13px; font-family:DM Mono,monospace; margin-top:-8px;'>"
     f"Showing <b style='color:#e8eaf0'>{len(df):,}</b> records after filters · "
@@ -256,26 +261,29 @@ stats = get_summary_stats(df)
 
 k1, k2, k3, k4, k5, k6 = st.columns(6)
 
-k1.metric("Total Crimes",    f"{stats['total_crimes']:,}")
-k2.metric("Peak Year",       str(stats['peak_year']),
-          f"{stats['peak_year_count']:,} incidents")
-k3.metric("Avg Victim Age",  str(stats['avg_victim_age']))
+k1.metric("Total Crimes", f"{stats['total_crimes']:,}")
+k2.metric(
+    "Peak Year", str(stats["peak_year"]), f"{stats['peak_year_count']:,} incidents"
+)
+k3.metric("Avg Victim Age", str(stats["avg_victim_age"]))
 k4.metric("Weapon Involved", f"{stats['weapon_pct']}%")
-k5.metric("Arrest Rate",     f"{stats['arrest_pct']}%")
-k6.metric("Crime Types",     str(stats['unique_crime_types']))
+k5.metric("Arrest Rate", f"{stats['arrest_pct']}%")
+k6.metric("Crime Types", str(stats["unique_crime_types"]))
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 
 # ── Tab layout ────────────────────────────────────────────────────────────────
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
-    "📈  Trends",
-    "🏙️  Geography & Crimes",
-    "🕐  Time Analysis",
-    "👥  Victim Demographics",
-    "🔫  Weapons & Status",
-])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(
+    [
+        "📈  Trends",
+        "🏙️  Geography & Crimes",
+        "🕐  Time Analysis",
+        "👥  Victim Demographics",
+        "🔫  Weapons & Status",
+    ]
+)
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -297,7 +305,8 @@ with tab1:
     )
 
     st.markdown("#### 💡 Trend Insights")
-    st.markdown("""
+    st.markdown(
+        """
     <div class="insight-box">
       <b>📈 Crime peaked in 2022</b> at 235,258 incidents — a 17.7% rise from 2020.
       Post-pandemic relaxation of restrictions and increased socioeconomic stress
@@ -312,7 +321,9 @@ with tab1:
       across most years, consistent with national criminology research on
       warm-weather crime spikes.
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -331,7 +342,8 @@ with tab2:
         st.plotly_chart(ch.area_bar(df, n_areas), use_container_width=True)
 
     st.markdown("#### 💡 Geography Insights")
-    st.markdown("""
+    st.markdown(
+        """
     <div class="insight-box">
       <b>🚗 Vehicle crimes dominate</b> — Vehicle Stolen (115K) and Burglary from
       Vehicle (63K) together account for nearly 18% of all crimes. Improving
@@ -342,7 +354,9 @@ with tab2:
       high population density, tourist activity, and homeless population create
       overlapping risk factors.
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -362,16 +376,20 @@ with tab3:
     with st.expander("📋 View raw hourly counts"):
         by_hour = df.groupby("hour_occ").size().reset_index(name="Crime Count")
         by_hour["Hour"] = by_hour["hour_occ"].apply(
-            lambda h: ("12 AM" if h == 0 else f"{h} AM" if h < 12
-                       else "12 PM" if h == 12 else f"{h-12} PM")
+            lambda h: (
+                "12 AM"
+                if h == 0
+                else f"{h} AM" if h < 12 else "12 PM" if h == 12 else f"{h-12} PM"
+            )
         )
         st.dataframe(
-            by_hour[["Hour","Crime Count"]].set_index("Hour"),
+            by_hour[["Hour", "Crime Count"]].set_index("Hour"),
             use_container_width=True,
         )
 
     st.markdown("#### 💡 Time Insights")
-    st.markdown("""
+    st.markdown(
+        """
     <div class="insight-box">
       <b>☀️ Noon is the single busiest hour</b> — 67,836 incidents recorded at
       12:00 PM. This likely reflects both reporting patterns and actual lunchtime
@@ -386,7 +404,9 @@ with tab3:
       <b>🌙 4–6 AM is the safest window</b> with the fewest incidents —
       ~17,000–19,000 per hour, compared to the noon peak of 67,836.
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -409,25 +429,35 @@ with tab4:
     col_a, col_b = st.columns(2)
     with col_a:
         sex_table = (
-            df["vict_sex"].value_counts()
+            df["vict_sex"]
+            .value_counts()
             .reset_index()
             .rename(columns={"vict_sex": "Gender", "count": "Count"})
         )
-        sex_table["% Share"] = (sex_table["Count"] / sex_table["Count"].sum() * 100).round(1)
+        sex_table["% Share"] = (
+            sex_table["Count"] / sex_table["Count"].sum() * 100
+        ).round(1)
         st.dataframe(sex_table, use_container_width=True, hide_index=True)
 
     with col_b:
         age_table = (
-            df["age_group"].value_counts()
-            .reindex(["0–17","18–24","25–34","35–44","45–54","55–64","65+"], fill_value=0)
+            df["age_group"]
+            .value_counts()
+            .reindex(
+                ["0–17", "18–24", "25–34", "35–44", "45–54", "55–64", "65+"],
+                fill_value=0,
+            )
             .reset_index()
             .rename(columns={"age_group": "Age Group", "count": "Count"})
         )
-        age_table["% Share"] = (age_table["Count"] / age_table["Count"].sum() * 100).round(1)
+        age_table["% Share"] = (
+            age_table["Count"] / age_table["Count"].sum() * 100
+        ).round(1)
         st.dataframe(age_table, use_container_width=True, hide_index=True)
 
     st.markdown("#### 💡 Demographic Insights")
-    st.markdown("""
+    st.markdown(
+        """
     <div class="insight-box">
       <b>👨 Male victims slightly outnumber female</b> (47% vs 42%).
       However, female victims are disproportionately represented in
@@ -442,7 +472,9 @@ with tab4:
       <b>🌎 Hispanic victims are most numerous</b> at 296,437 — consistent with
       LA's overall demographic composition (~49% Hispanic population).
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -461,15 +493,19 @@ with tab5:
 
         # Status breakdown table
         status_tbl = (
-            df["status_full"].value_counts()
+            df["status_full"]
+            .value_counts()
             .reset_index()
             .rename(columns={"status_full": "Status", "count": "Count"})
         )
-        status_tbl["% Share"] = (status_tbl["Count"] / status_tbl["Count"].sum() * 100).round(1)
+        status_tbl["% Share"] = (
+            status_tbl["Count"] / status_tbl["Count"].sum() * 100
+        ).round(1)
         st.dataframe(status_tbl, use_container_width=True, hide_index=True)
 
     st.markdown("#### 💡 Weapon & Status Insights")
-    st.markdown("""
+    st.markdown(
+        """
     <div class="insight-box">
       <b>✊ Physical force dominates</b> — "Strong-Arm" (hands, fists, feet)
       is the most common weapon at 174,777 incidents, accounting for more than
@@ -484,7 +520,9 @@ with tab5:
       Continued" status, highlighting a systemic clearance rate challenge
       for LAPD across all crime categories.
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 # ── Raw Data Explorer ─────────────────────────────────────────────────────────
@@ -499,12 +537,23 @@ with st.expander("🔬 Raw Data Explorer — browse cleaned records"):
     )
 
     # Column selector
-    default_cols = ["dr_no","date_occ","area_name","crm_cd_desc",
-                    "vict_age","vict_sex","vict_descent_full",
-                    "weapon_desc","status_full","year","month"]
+    default_cols = [
+        "dr_no",
+        "date_occ",
+        "area_name",
+        "crm_cd_desc",
+        "vict_age",
+        "vict_sex",
+        "vict_descent_full",
+        "weapon_desc",
+        "status_full",
+        "year",
+        "month",
+    ]
     visible_cols = [c for c in default_cols if c in df.columns]
-    selected_cols = st.multiselect("Columns to display", df.columns.tolist(),
-                                   default=visible_cols)
+    selected_cols = st.multiselect(
+        "Columns to display", df.columns.tolist(), default=visible_cols
+    )
 
     n_rows = st.slider("Rows to preview", 10, 500, 100, step=10)
     st.dataframe(df[selected_cols].head(n_rows), use_container_width=True)
